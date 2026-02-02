@@ -1,0 +1,11 @@
+stable-baselines3==2.2.1
+gymnasium==0.29.1
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+torch
+fastapi
+uvicorn
+pydantic
