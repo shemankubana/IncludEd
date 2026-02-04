@@ -11,4 +11,4 @@ uvicorn
 litserve
 pydantic
 tensorboard
-'stable-baselines3[extra]'
+stable-baselines3[extra]

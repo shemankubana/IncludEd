@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-02-04T20:45:08.746187",
+  "model_type": "PPO (Proximal Policy Optimization)",
+  "training_timesteps": 10000,
+  "ppo_metrics": {
+    "mean_reward": -0.32702897587809276,
+    "std_reward": 0.8047595947737977,
+    "mean_comprehension_improvement": 0.05030159652233124,
+    "mean_attention_improvement": 0.07720595598220825,
+    "action_distribution": {
+      "Maintain": 4660,
+      "Text Size": 270,
+      "Difficulty": 66,
+      "TTS": 4
+    }
+  },
+  "baseline_metrics": {
+    "mean_reward": -3.9702516908782672,
+    "mean_comprehension_improvement": 0.0,
+    "mean_attention_improvement": 0.0
+  },
+  "improvements_over_baseline": {
+    "reward": "+91.8%",
+    "comprehension": "+inf%",
+    "attention": "+inf%"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "model_name": "IncludEd_PPO_v1",
+  "version": "1.0.0",
+  "created_at": "2026-02-04T20:45:12.408397",
+  "framework": "Stable-Baselines3",
+  "algorithm": "PPO",
+  "state_dim": 8,
+  "action_dim": 5,
+  "state_features": [
+    "reading_speed",
+    "mouse_dwell_time",
+    "scroll_hesitation",
+    "backtrack_frequency",
+    "attention_score",
+    "current_difficulty",
+    "time_on_task",
+    "comprehension_score"
+  ],
+  "actions": {
+    "0": "maintain_current_settings",
+    "1": "increase_text_size_spacing",
+    "2": "activate_text_to_speech",
+    "3": "insert_attention_break",
+    "4": "adjust_content_difficulty"
+  },
+  "hyperparameters": {
+    "learning_rate": 0.0003,
+    "batch_size": 64,
+    "n_epochs": 10,
+    "gamma": 0.99,
+    "clip_range": 0.2
+  },
+  "performance": {
+    "mean_reward": -0.32702897587809276,
+    "mean_comprehension_improvement": 0.05030159652233124,
+    "mean_attention_improvement": 0.07720595598220825
+  }
+}
