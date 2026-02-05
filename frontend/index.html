@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IncludEd - Adaptive Learning Platform MVP</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .status-badge {
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .reading-panel {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .reading-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .reading-text.large-font {
+            font-size: 22px;
+            line-height: 2.0;
+            letter-spacing: 0.12em;
+        }
+
+        .reading-text.tts-active {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .word-highlight {
+            background: #fbbf24;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .metric-value {
+            color: #111827;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        .ai-suggestion {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #f59e0b;
+            margin-top: 15px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ai-suggestion-title {
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-suggestion-text {
+            color: #78350f;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .break-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 1000;
+            text-align: center;
+            min-width: 400px;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .break-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .break-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .break-timer {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .student-info {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-chip {
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #4b5563;
+            font-weight: 600;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        function IncludEdApp() {
+            const [studentState, setStudentState] = useState({
+                reading_speed: 75.5,
+                mouse_dwell_time: 850.2,
+                scroll_hesitation: 12.3,
+                backtrack_frequency: 18.7,
+                attention_score: 62.5,
+                current_difficulty: 3,
+                time_on_task: 8.2,
+                comprehension_score: 58.3
+            });
+
+            const [uiSettings, setUiSettings] = useState({
+                fontSize: 'normal',
+                ttsActive: false,
+                showBreakModal: false
+            });
+
+            const [aiSuggestion, setAiSuggestion] = useState(null);
+            const [isAnalyzing, setIsAnalyzing] = useState(false);
+            const [breakTimer, setBreakTimer] = useState(120);
+            const [isBreakActive, setIsBreakActive] = useState(false);
+
+            const readingText = `The Lion and the Mouse
+
+Once upon a time, a mighty lion lay sleeping in the shade of a great tree. A tiny mouse ran across the lion's paw and woke him up. The angry lion grabbed the mouse with his huge paw.
+
+"Please don't eat me!" squeaked the frightened mouse. "If you let me go, I promise I will help you someday."
+
+The lion laughed. "How could a tiny creature like you ever help someone as big and strong as me?" But he was amused by the mouse's bravery, so he let the little mouse go free.
+
+A few days later, the lion was caught in a hunter's net. He roared and struggled, but he couldn't break free. The little mouse heard the lion's roar and came running. She saw the lion trapped in the net and immediately began gnawing at the ropes with her sharp teeth.
+
+Soon, the mouse had chewed through enough rope for the lion to escape. "You were right," said the lion gratefully. "Even a small friend can be a great friend."`;
+
+            const timerRef = useRef(null);
+
+            // Simulate attention tracking
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setStudentState(prev => ({
+                        ...prev,
+                        attention_score: Math.max(20, Math.min(100, prev.attention_score + (Math.random() - 0.3) * 5)),
+                        time_on_task: prev.time_on_task + 0.05
+                    }));
+                }, 2000);
+
+                return () => clearInterval(interval);
+            }, []);
+
+            // Break timer countdown
+            useEffect(() => {
+                if (isBreakActive && breakTimer > 0) {
+                    timerRef.current = setTimeout(() => {
+                        setBreakTimer(prev => prev - 1);
+                    }, 1000);
+                } else if (breakTimer === 0) {
+                    handleBreakComplete();
+                }
+
+                return () => {
+                    if (timerRef.current) clearTimeout(timerRef.current);
+                };
+            }, [isBreakActive, breakTimer]);
+
+            const callRLModel = async () => {
+                setIsAnalyzing(true);
+                
+                // Simulate API call to FastAPI backend
+                try {
+                    const response = await fetch('http://localhost:8000/predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            student_id: 'STU_001',
+                            session_id: 'SESSION_' + Date.now(),
+                            state: studentState,
+                            disability_type: 'dyslexia'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('API call failed');
+                    }
+
+                    const data = await response.json();
+                    applyAIAction(data);
+
+                } catch (error) {
+                    // Fallback to simulated decision for demo
+                    simulateAIDecision();
+                }
+
+                setIsAnalyzing(false);
+            };
+
+            const simulateAIDecision = () => {
+                // Rule-based fallback for demo
+                if (studentState.attention_score < 40) {
+                    setAiSuggestion({
+                        action: 'insert_break',
+                        description: 'AI detected low attention. Recommending 2-minute break.',
+                        confidence: 87
+                    });
+                    setUiSettings(prev => ({ ...prev, showBreakModal: true }));
+                    setIsBreakActive(true);
+                    setBreakTimer(120);
+                } else if (studentState.reading_speed < 60 && studentState.backtrack_frequency > 15) {
+                    setAiSuggestion({
+                        action: 'activate_tts',
+                        description: 'AI recommends text-to-speech to improve comprehension.',
+                        confidence: 92
+                    });
+                } else if (studentState.comprehension_score < 60) {
+                    setAiSuggestion({
+                        action: 'increase_text_size',
+                        description: 'AI suggests larger text for better readability.',
+                        confidence: 84
+                    });
+                } else {
+                    setAiSuggestion({
+                        action: 'maintain',
+                        description: 'AI analysis: Current settings are optimal. Great progress!',
+                        confidence: 78
+                    });
+                }
+            };
+
+            const applyAIAction = (apiResponse) => {
+                setAiSuggestion({
+                    action: apiResponse.action_name,
+                    description: apiResponse.action_description,
+                    confidence: Math.round(apiResponse.confidence * 100)
+                });
+
+                // Apply UI changes from API response
+                apiResponse.ui_changes.forEach(change => {
+                    if (change.type === 'font_size') {
+                        setUiSettings(prev => ({ ...prev, fontSize: 'large' }));
+                    } else if (change.type === 'tts_enabled') {
+                        setUiSettings(prev => ({ ...prev, ttsActive: true }));
+                    } else if (change.type === 'show_break_modal') {
+                        setUiSettings(prev => ({ ...prev, showBreakModal: true }));
+                        setIsBreakActive(true);
+                        setBreakTimer(120);
+                    }
+                });
+            };
+
+            const toggleTTS = () => {
+                setUiSettings(prev => ({ ...prev, ttsActive: !prev.ttsActive }));
+            };
+
+            const toggleFontSize = () => {
+                setUiSettings(prev => ({
+                    ...prev,
+                    fontSize: prev.fontSize === 'normal' ? 'large' : 'normal'
+                }));
+            };
+
+            const handleBreakComplete = () => {
+                setIsBreakActive(false);
+                setUiSettings(prev => ({ ...prev, showBreakModal: false }));
+                setBreakTimer(120);
+                setStudentState(prev => ({
+                    ...prev,
+                    attention_score: Math.min(100, prev.attention_score + 30)
+                }));
+            };
+
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <h1>🎓 IncludEd - Adaptive Learning Platform</h1>
+                        <div className="status-badge">
+                            🤖 AI Active
+                        </div>
+                    </div>
+
+                    <div className="main-content">
+                        <div className="reading-panel">
+                            <div className="student-info">
+                                <div className="info-chip">👤 Ivan Shema</div>
+                                <div className="info-chip">📚 Primary 4</div>
+                                <div className="info-chip">🎯 Dyslexia Support</div>
+                            </div>
+
+                            <div className={`reading-text ${uiSettings.fontSize === 'large' ? 'large-font' : ''} ${uiSettings.ttsActive ? 'tts-active' : ''}`}>
+                                {uiSettings.ttsActive ? (
+                                    <>
+                                        The Lion and the <span className="word-highlight">Mouse</span>
+                                        <br /><br />
+                                        Once upon a time, a mighty lion lay sleeping...
+                                    </>
+                                ) : (
+                                    readingText
+                                )}
+                            </div>
+
+                            <div className="controls">
+                                <button className="btn btn-primary" onClick={callRLModel}>
+                                    {isAnalyzing ? (
+                                        <>
+                                            <span className="loading-spinner"></span>
+                                            AI Analyzing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            🧠 Get AI Recommendation
+                                        </>
+                                    )}
+                                </button>
+                                <button className="btn btn-secondary" onClick={toggleTTS}>
+                                    {uiSettings.ttsActive ? '🔊 Disable TTS' : '🔈 Enable TTS'}
+                                </button>
+                                <button className="btn btn-secondary" onClick={toggleFontSize}>
+                                    {uiSettings.fontSize === 'large' ? '🔍 Normal Text' : '🔍 Large Text'}
+                                </button>
+                                <button className="btn btn-success">
+                                    ✓ Mark Complete
+                                </button>
+                            </div>
+
+                            {aiSuggestion && (
+                                <div className="ai-suggestion">
+                                    <div className="ai-suggestion-title">
+                                        🤖 AI Recommendation (Confidence: {aiSuggestion.confidence}%)
+                                    </div>
+                                    <div className="ai-suggestion-text">
+                                        {aiSuggestion.description}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="sidebar">
+                            <div className="card">
+                                <h3>📊 Real-Time Metrics</h3>
+                                <div className="metric">
+                                    <span className="metric-label">Reading Speed</span>
+                                    <span className="metric-value">{studentState.reading_speed.toFixed(1)} WPM</span>
+                                </div>
+                                <div className="metric">
+                                    <span className="metric-label">Attention Score</span>
+                                    <span className="metric-value">{studentState.attention_score.toFixed(0)}%</span>
+                                </div>
+                                <div className="progress-bar">
+                                    <div className="progress-fill" style={{width: `${studentState.attention_score}%`}}></div>
+                                </div>
+                                <div className="metric">
+                                    <span className="metric-label">Comprehension</span>
+                                    <span className="metric-value">{studentState.comprehension_score.toFixed(0)}%</span>
+                                </div>
+                                <div className="progress-bar">
+                                    <div className="progress-fill" style={{width: `${studentState.comprehension_score}%`}}></div>
+                                </div>
+                                <div className="metric">
+                                    <span className="metric-label">Time on Task</span>
+                                    <span className="metric-value">{studentState.time_on_task.toFixed(1)} min</span>
+                                </div>
+                            </div>
+
+                            <div className="card">
+                                <h3>🎯 Session Progress</h3>
+                                <div className="metric">
+                                    <span className="metric-label">Current Level</span>
+                                    <span className="metric-value">Level {studentState.current_difficulty}</span>
+                                </div>
+                                <div className="metric">
+                                    <span className="metric-label">Backtrack Events</span>
+                                    <span className="metric-value">{studentState.backtrack_frequency.toFixed(0)}</span>
+                                </div>
+                                <div className="metric">
+                                    <span className="metric-label">Mouse Dwell Time</span>
+                                    <span className="metric-value">{studentState.mouse_dwell_time.toFixed(0)}ms</span>
+                                </div>
+                            </div>
+
+                            <div className="card">
+                                <h3>💡 Today's Goal</h3>
+                                <p style={{color: '#6b7280', fontSize: '14px', lineHeight: '1.6'}}>
+                                    Complete 3 reading exercises with 70%+ comprehension. You're 2/3 done! 🎉
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {uiSettings.showBreakModal && (
+                        <>
+                            <div className="break-modal-overlay" onClick={handleBreakComplete}></div>
+                            <div className="break-modal">
+                                <div className="break-icon">⏸️</div>
+                                <h2 style={{color: '#667eea', marginBottom: '10px'}}>Time for a Break!</h2>
+                                <p style={{color: '#6b7280', marginBottom: '20px'}}>
+                                    AI detected you need rest. Relax for 2 minutes.
+                                </p>
+                                <div className="break-timer">{formatTime(breakTimer)}</div>
+                                <button className="btn btn-warning" onClick={handleBreakComplete}>
+                                    Skip Break
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<IncludEdApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
@@ -131,18 +132,26 @@ async def load_model():
     """Load trained RL model and feature scaler on startup"""
     global MODEL, SCALER, MODEL_METADATA
     
+    # Get the base directory (parent of api directory)
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    MODELS_DIR = BASE_DIR / "models"
+    
     try:
         # Load PPO model
-        MODEL = PPO.load("../models/ppo_adaptive_learning")
+        # PPO.load handles the .zip extension automatically, but we can pass the path object or string
+        model_path = MODELS_DIR / "ppo_adaptive_learning"
+        MODEL = PPO.load(model_path)
         print("✅ PPO model loaded successfully")
         
         # Load feature scaler
-        with open("../models/feature_scaler.pkl", "rb") as f:
+        scaler_path = MODELS_DIR / "feature_scaler.pkl"
+        with open(scaler_path, "rb") as f:
             SCALER = pickle.load(f)
         print("✅ Feature scaler loaded successfully")
         
         # Load model metadata
-        with open("../models/model_metadata.json", "r") as f:
+        metadata_path = MODELS_DIR / "model_metadata.json"
+        with open(metadata_path, "r") as f:
             MODEL_METADATA = json.load(f)
         print("✅ Model metadata loaded successfully")
         
